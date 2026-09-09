@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Manager - LMS Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- AUTHENTICATION MODAL -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-100">
+            <div class="flex items-center justify-center mb-3">
+                <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 via-indigo-500 to-violet-500 rounded-xl flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-indigo-500/20 ring-2 ring-white/10">
+                    M
+                </div>
+            </div>
+            <h2 class="text-xl font-bold text-center text-slate-900 mb-1 tracking-tight">LMS Portal Access</h2>
+            <p class="text-xs text-center text-slate-500 mb-5">Sign in to your account or create a new one</p>
+
+            <div class="flex border-b border-slate-200 mb-5 text-xs font-semibold">
+                <button id="signInTab" onclick="switchAuthTab('signin')" class="flex-1 py-2 text-center text-blue-600 border-b-2 border-blue-600 focus:outline-none">
+                    Sign In
+                </button>
+                <button id="signUpTab" onclick="switchAuthTab('signup')" class="flex-1 py-2 text-center text-slate-400 border-b-2 border-transparent hover:text-slate-600 focus:outline-none">
+                    Sign Up
+                </button>
+            </div>
+
+            <!-- SIGN IN FORM -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Username</label>
+                    <input type="text" id="username" required placeholder="admin or john" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-xs transition shadow-md shadow-blue-500/20 active:scale-95">
+                    Sign In
+                </button>
+            </form>
+
+            <!-- SIGN UP FORM -->
+            <form id="signUpForm" onsubmit="handleSignUp(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" id="signupName" required placeholder="John Doe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Username</label>
+                    <input type="text" id="signupUsername" required placeholder="johndoe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="signupPassword" required placeholder="••••••••" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Role</label>
+                    <select id="signupRole" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition">
+                        <option value="employee">Employee</option>
+                        <option value="manager">Manager</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-xs transition shadow-md shadow-blue-500/20 active:scale-95">
+                    Create Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <div id="app" class="flex flex-col md:flex-row h-screen w-full hidden overflow-hidden">
+        
+        <!-- MOBILE OVERLAY BACKDROP -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-30 hidden md:hidden"></div>
+
+        <!-- LEFT SIDEBAR NAVIGATION -->
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-20 bg-[#0F172A] text-slate-400 flex flex-col justify-between items-center py-5 flex-shrink-0 z-40 border-r border-slate-800 transition-transform duration-300 transform -translate-x-full md:translate-x-0">
+            <div class="flex flex-col items-center gap-7 w-full">
+                <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 via-indigo-500 to-violet-500 rounded-xl flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-indigo-500/20 ring-2 ring-white/10 hover:scale-105 transition duration-200">
+                    M
+                </div>
+                <nav class="flex flex-col items-center gap-3 w-full px-3">
+                    <a href="#" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800/80 hover:text-slate-100 transition duration-150"><i data-lucide="menu" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800/80 hover:text-slate-100 transition duration-150"><i data-lucide="search" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800/80 hover:text-slate-100 transition duration-150"><i data-lucide="building-2" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2.5 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/30 transition duration-150"><i data-lucide="user-check" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800/80 hover:text-slate-100 transition duration-150"><i data-lucide="calendar" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800/80 hover:text-slate-100 transition duration-150"><i data-lucide="megaphone" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800/80 hover:text-slate-100 transition duration-150"><i data-lucide="pie-chart" class="w-5 h-5"></i></a>
+                </nav>
+            </div>
+
+            <div class="flex flex-col items-center gap-4">
+                <button onclick="handleLogout()" title="Sign Out" class="p-2.5 text-slate-400 hover:text-red-400 hover:bg-slate-800/80 rounded-xl transition duration-150">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN BODY AREA -->
+        <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto md:overflow-hidden">
+
+            <!-- TOP HEADER BAR -->
+            <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-7 py-3 flex flex-wrap lg:flex-nowrap justify-between items-center gap-3 shadow-xs z-20">
+                <div class="flex items-center gap-3 sm:gap-5 w-full sm:w-auto justify-between sm:justify-start">
+                    <button onclick="toggleSidebar()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Lead Manager</h1>
+                    
+                    <div class="hidden sm:flex items-center gap-2 border-l border-slate-200 pl-5 text-xs font-semibold text-slate-500">
+                        <span>Role:</span>
+                        <span id="roleBadgeDisplay" class="px-2 py-0.5 rounded text-[10px] uppercase font-extrabold bg-blue-100 text-blue-700">Manager</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap w-full sm:w-auto justify-end">
+                    
+                    <!-- FILE SELECTOR DROPDOWN -->
+                    <div class="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-lg border border-slate-200">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 ml-1.5"></i>
+                        <select id="savedFilesSelect" onchange="loadSelectedFile(this.value)" class="text-xs bg-transparent border-none text-slate-700 font-semibold focus:outline-none max-w-[150px] sm:max-w-[200px] truncate">
+                            <option value="all">All Saved Leads</option>
+                        </select>
+                        <button id="downloadFileBtn" onclick="downloadCurrentFile()" title="Download Excel File" class="hidden p-1 text-slate-500 hover:text-blue-600 rounded">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+
+                    <div class="relative flex-1 sm:flex-none">
+                        <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+                        <input type="text" id="global-search" oninput="filterLeads()" placeholder="Search leads..." class="pl-8 pr-3 py-1.5 text-xs bg-slate-100/70 border border-slate-200 rounded-lg w-full sm:w-40 lg:w-48 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                    </div>
+
+                    <label for="excelFileInput" class="cursor-pointer bg-slate-900 hover:bg-slate-800 text-white text-xs px-3 py-1.5 sm:py-2 rounded-lg font-semibold flex items-center gap-1.5 transition active:scale-95">
+                        <i data-lucide="upload-cloud" class="w-4 h-4"></i> <span class="hidden sm:inline">Import</span>
+                    </label>
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="uploadExcelFile(event)">
+
+                    <div id="userBadge" class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white text-xs font-bold flex items-center justify-center ring-2 ring-slate-100 shadow-2xs">
+                        M
+                    </div>
+
+                    <button onclick="handleLogout()" class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg border border-slate-200 transition">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        <span class="hidden md:inline">Logout</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- FILTER CONTROL PANEL -->
+            <div class="bg-white border-b border-slate-200/80 px-4 sm:px-7 py-3.5 shadow-2xs z-10">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 items-end">
+                    <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
+                        <label>Lead Stage</label>
+                        <select id="filter-stage" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
+                            <option value="all">All Stages</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
+                        <label>Lead Owner / Teams</label>
+                        <select id="filter-owner" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
+                            <option value="all">All Owners</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
+                        <label>Campaign Source</label>
+                        <select id="filter-campaign" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
+                            <option value="all">All Campaigns</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-between col-span-2 sm:col-span-1 gap-2 pt-2">
+                        <button id="reset-filters" onclick="resetFilters()" class="text-xs text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-1 transition">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADDED: STAGE QUICK FILTER BUTTONS BAR -->
+            <div class="bg-slate-50/70 border-b border-slate-200 px-4 sm:px-7 py-2.5 flex items-center gap-2 overflow-x-auto custom-scrollbar text-xs">
+                <span class="text-slate-400 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">Filter Stage:</span>
+                <div id="stageButtonsBar" class="flex items-center gap-1.5">
+                    <!-- Buttons dynamically populated by JS -->
+                </div>
+            </div>
+
+            <!-- DYNAMIC LEADS TABLE AREA -->
+            <div class="flex-1 overflow-auto custom-scrollbar p-3 sm:p-6">
+                <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-x-auto min-h-[350px]">
+                    <table class="w-full min-w-[900px] text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/70 text-slate-700 text-xs font-bold border-b border-slate-200 uppercase tracking-wider">
+                                <th class="px-4 py-3.5 text-center w-10">#</th>
+                                <th class="px-4 py-3.5">Registered Name</th>
+                                <th class="px-4 py-3.5">Lead Owner</th>
+                                <th class="px-4 py-3.5">Contact & Actions</th>
+                                <th class="px-4 py-3.5">Campaign</th>
+                                <th class="px-4 py-3.5">Registration Date</th>
+                                <th class="px-4 py-3.5">Email</th>
+                                <th class="px-4 py-3.5 text-center">Stage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadsTableBody" class="divide-y divide-slate-100 text-xs text-slate-700 font-normal">
+                            <!-- Dynamic Content Rendered Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABLE FOOTER -->
+            <footer class="bg-white border-t border-slate-200/80 px-4 sm:px-7 py-3 flex justify-between items-center text-xs text-slate-500">
+                <div>
+                    Showing <span id="showing-count" class="font-bold text-slate-900">0</span> of <span id="total-count" class="font-bold text-slate-900">0</span> leads
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- EMAIL TEMPLATE MODAL -->
+    <div id="emailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-100">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div class="flex items-center gap-2 text-blue-600 font-bold text-sm">
+                    <i data-lucide="mail" class="w-4 h-4"></i> Compose Gmail Message
+                </div>
+                <button onclick="closeModal('emailModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Recipient</label>
+                    <input type="text" id="emailRecipient" readonly class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-mono text-slate-700">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Select Email Template</label>
+                    <select id="emailTemplateSelect" onchange="applyEmailTemplate()" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium">
+                        <option value="assign">Assign Lead Details to Employee</option>
+                        <option value="update">Request Work Update / Lead Status</option>
+                        <option value="followup">Lead Follow-Up Greeting</option>
+                        <option value="custom">Custom Message</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Subject</label>
+                    <input type="text" id="emailSubject" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Message Body</label>
+                    <textarea id="emailBody" rows="5" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"></textarea>
+                </div>
+                <button onclick="launchGmail()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-md shadow-blue-500/20">
+                    <i data-lucide="external-link" class="w-4 h-4"></i> Open in Gmail Compose
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHATSAPP TEMPLATE MODAL -->
+    <div id="whatsappModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-100">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div class="flex items-center gap-2 text-emerald-600 font-bold text-sm">
+                    <i data-lucide="message-square" class="w-4 h-4"></i> Send WhatsApp Message
+                </div>
+                <button onclick="closeModal('whatsappModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Phone Number</label>
+                    <input type="text" id="waPhone" readonly class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-mono text-slate-700">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Ready Text Template</label>
+                    <select id="waTemplateSelect" onchange="applyWATemplate()" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium">
+                        <option value="assign">New Lead Assignment Notice</option>
+                        <option value="update">Quick Progress Check</option>
+                        <option value="lead_followup">Lead Initial Outreach</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Message Preview</label>
+                    <textarea id="waMessageBody" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"></textarea>
+                </div>
+                <button onclick="launchWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20">
+                    <i data-lucide="send" class="w-4 h-4"></i> Send on WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DESKTOP CALL WARNING MODAL -->
+    <div id="desktopCallModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center border border-slate-100">
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="phone-off" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-1">Phone Calling Feature</h3>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Direct calling is optimized for mobile devices. On desktop, this will open your system's default dialer (e.g., FaceTime, Skype, Phone Link).</p>
+            
+            <div class="bg-slate-100 p-2.5 rounded-lg font-mono font-bold text-slate-800 text-xs mb-4 flex justify-between items-center">
+                <span id="callModalPhone">+1234567890</span>
+                <button onclick="copyToClipboard()" class="text-blue-600 text-[11px] hover:underline font-semibold flex items-center gap-1">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                </button>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="closeModal('desktopCallModal')" class="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <a id="proceedCallBtn" href="#" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1">Proceed</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT & LOGIC -->
+    <script>
+        let currentUser = null;
+        let leadsData = [];
+        let activeLeadContext = null;
+        let selectedFileId = 'all';
+        const availableStages = ["New", "Contacted", "Qualified", "In Progress", "Negotiation", "Closed Won", "Closed Lost"];
+
+        lucide.createIcons();
+
+        function escapeQuotes(str) {
+            if (!str) return '';
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+
+        function switchAuthTab(tab) {
+            document.getElementById('signInTab').className = tab === 'signin' ? "flex-1 py-2 text-center text-blue-600 border-b-2 border-blue-600 focus:outline-none" : "flex-1 py-2 text-center text-slate-400 border-b-2 border-transparent hover:text-slate-600 focus:outline-none";
+            document.getElementById('signUpTab').className = tab === 'signup' ? "flex-1 py-2 text-center text-blue-600 border-b-2 border-blue-600 focus:outline-none" : "flex-1 py-2 text-center text-slate-400 border-b-2 border-transparent hover:text-slate-600 focus:outline-none";
+            document.getElementById('loginForm').classList.toggle('hidden', tab !== 'signin');
+            document.getElementById('signUpForm').classList.toggle('hidden', tab !== 'signup');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                alert("Invalid username or password!");
+                return;
+            }
+
+            const data = await response.json();
+            loginUser(data.user);
+        }
+
+        async function handleSignUp(e) {
+            e.preventDefault();
+            const name = document.getElementById('signupName').value.trim();
+            const username = document.getElementById('signupUsername').value.trim();
+            const password = document.getElementById('signupPassword').value.trim();
+            const role = document.getElementById('signupRole').value;
+
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, username, password, role })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                alert(data.detail || "Sign up failed.");
+                return;
+            }
+
+            alert("Account created successfully!");
+            loginUser(data.user);
+        }
+
+        function loginUser(user) {
+            currentUser = user;
+            const initials = user.name.split(" ").map(n => n[0]).join("").toUpperCase();
+            document.getElementById('userBadge').innerText = initials || 'M';
+            document.getElementById('roleBadgeDisplay').innerText = user.role || 'employee';
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            
+            fetchUploadedFiles();
+            fetchLeads();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        async function fetchUploadedFiles() {
+            const response = await fetch('/api/uploaded-files');
+            if (!response.ok) return;
+
+            const data = await response.json();
+            const select = document.getElementById('savedFilesSelect');
+            select.innerHTML = '<option value="all">All Saved Leads</option>';
+
+            (data.files || []).forEach(file => {
+                const option = document.createElement('option');
+                option.value = file.id;
+                option.textContent = `${file.filename} (${file.lead_count})`;
+                select.appendChild(option);
+            });
+
+            select.value = selectedFileId;
+        }
+
+        async function loadSelectedFile(fileId) {
+            selectedFileId = fileId;
+            const downloadBtn = document.getElementById('downloadFileBtn');
+
+            if (fileId === 'all') {
+                downloadBtn.classList.add('hidden');
+                await fetchLeads();
+            } else {
+                downloadBtn.classList.remove('hidden');
+                const response = await fetch(`/api/uploaded-files/${fileId}/leads`);
+                if (response.ok) {
+                    const data = await response.json();
+                    leadsData = data.leads || [];
+                    populateDynamicFilters();
+                    renderStageButtons();
+                    renderTable(leadsData);
+                }
+            }
+        }
+
+        function downloadCurrentFile() {
+            if (selectedFileId && selectedFileId !== 'all') {
+                window.open(`/api/uploaded-files/${selectedFileId}/download`, '_blank');
+            }
+        }
+
+        async function fetchLeads() {
+            const response = await fetch('/api/leads');
+            const data = await response.json();
+            leadsData = data.leads || [];
+            populateDynamicFilters();
+            renderStageButtons();
+            renderTable(leadsData);
+        }
+
+        function renderTable(leads) {
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '';
+
+            if (!leads || leads.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-16 bg-white">
+                            <div class="max-w-xs mx-auto flex flex-col items-center p-4">
+                                <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-3 ring-8 ring-blue-50/50">
+                                    <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 mb-1">No Leads Loaded Yet</h3>
+                                <p class="text-xs text-slate-500 mb-5">Upload your Excel file to populate the Lead Manager table.</p>
+                            </div>
+                        </td>
+                    </tr>`;
+                lucide.createIcons();
+                updateCounts(0);
+                return;
+            }
+
+            const userRole = (currentUser && currentUser.role) ? currentUser.role.toLowerCase() : '';
+            const isManager = userRole === 'manager' || userRole === 'admin';
+
+            leads.forEach((lead, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition duration-150 border-b border-slate-100";
+                
+                const currentStage = lead.stage || 'New';
+                let stageCellContent = '';
+
+                if (isManager) {
+                    const stageOptions = availableStages.map(s => 
+                        `<option value="${s}" ${s.toLowerCase() === currentStage.toLowerCase() ? 'selected' : ''}>${s}</option>`
+                    ).join('');
+                    stageCellContent = `<select onchange="updateLeadStage(${lead.id}, this.value)" class="px-2 py-1 text-[11px] font-bold rounded-lg bg-blue-50 text-blue-700 border border-blue-200 focus:outline-none cursor-pointer">${stageOptions}</select>`;
+                } else {
+                    stageCellContent = `<span class="px-2.5 py-1 text-[10px] font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">${currentStage}</span>`;
+                }
+
+                const cleanPhone = (lead.phone || '').replace(/[^0-9+]/g, '');
+                const safeName = escapeQuotes(lead.name || '');
+                const safeOwner = escapeQuotes(lead.owner || '');
+                const safeEmail = escapeQuotes(lead.email || '');
+
+                let contactCellContent = '';
+                if (isManager) {
+                    contactCellContent = `
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="handlePhoneClick('${cleanPhone}')" class="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded border border-emerald-200/80 font-medium transition cursor-pointer">
+                                <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                ${lead.phone || 'N/A'}
+                            </button>
+                            ${cleanPhone && cleanPhone !== 'N/A' ? `
+                            <button type="button" onclick="openWhatsAppModal('${safeName}', '${cleanPhone}', '${safeOwner}')" title="Send WhatsApp Message" class="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition shadow-xs cursor-pointer">
+                                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                            </button>` : ''}
+                        </div>`;
+                } else {
+                    contactCellContent = `<span class="text-slate-700 font-medium">${lead.phone || 'N/A'}</span>`;
+                }
+
+                let emailCellContent = '';
+                if (isManager && lead.email && lead.email !== 'N/A') {
+                    emailCellContent = `
+                        <button type="button" onclick="openEmailModal('${safeEmail}', '${safeName}', '${safeOwner}')" class="text-blue-600 hover:text-blue-800 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer">
+                            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                            ${lead.email}
+                        </button>`;
+                } else {
+                    emailCellContent = `<span class="${lead.email && lead.email !== 'N/A' ? 'text-slate-700 font-medium' : 'text-slate-400'}">${lead.email || 'N/A'}</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3.5 text-center font-semibold text-slate-400">${index + 1}</td>
+                    <td class="px-4 py-3.5 font-bold text-slate-800">${lead.name || 'N/A'}</td>
+                    <td class="px-4 py-3.5 font-semibold text-slate-700">${lead.owner || 'Unassigned'}</td>
+                    <td class="px-4 py-3.5">${contactCellContent}</td>
+                    <td class="px-4 py-3.5 text-slate-600 font-medium">${lead.campaign || 'Direct/Organic'}</td>
+                    <td class="px-4 py-3.5 text-slate-600 font-medium">${lead.date || 'N/A'}</td>
+                    <td class="px-4 py-3.5">${emailCellContent}</td>
+                    <td class="px-4 py-3.5 text-center">${stageCellContent}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+            updateCounts(leads.length);
+        }
+
+        function openEmailModal(email, leadName, owner) {
+            activeLeadContext = { email, leadName, owner };
+            document.getElementById('emailRecipient').value = email;
+            document.getElementById('emailTemplateSelect').value = 'assign';
+            applyEmailTemplate();
+            document.getElementById('emailModal').classList.remove('hidden');
+        }
+
+        function applyEmailTemplate() {
+            const templateType = document.getElementById('emailTemplateSelect').value;
+            const context = activeLeadContext || { leadName: 'Lead', owner: 'Team Member' };
+            
+            let subject = "";
+            let body = "";
+
+            if (templateType === 'assign') {
+                subject = `[LMS Task] Lead Assignment Details: ${context.leadName}`;
+                body = `Hello ${context.owner},\n\nYou have been assigned a new lead on LMS Dashboard.\n\nLead Name: ${context.leadName}\nContact Email: ${context.email}\n\nPlease reach out and update the lead stage accordingly.`;
+            } else if (templateType === 'update') {
+                subject = `[Status Check] Work Update Required: ${context.leadName}`;
+                body = `Hi ${context.owner},\n\nCould you please provide a progress update regarding the lead "${context.leadName}"?\n\nLet me know if there are any blockers.\n\nRegards,`;
+            } else if (templateType === 'followup') {
+                subject = `Following Up - ${context.leadName}`;
+                body = `Hi ${context.leadName},\n\nThank you for connecting with us. We are reaching out to see if you have any questions regarding our services.\n\nBest regards,`;
+            } else {
+                subject = "LMS Update";
+                body = "";
+            }
+
+            document.getElementById('emailSubject').value = subject;
+            document.getElementById('emailBody').value = body;
+        }
+
+        function launchGmail() {
+            const to = encodeURIComponent(document.getElementById('emailRecipient').value);
+            const subject = encodeURIComponent(document.getElementById('emailSubject').value);
+            const body = encodeURIComponent(document.getElementById('emailBody').value);
+
+            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+            window.open(gmailUrl, '_blank');
+            closeModal('emailModal');
+        }
+
+        function handlePhoneClick(phone) {
+            if (!phone || phone === 'N/A') return;
+
+            if (isMobileDevice()) {
+                window.location.href = `tel:${phone}`;
+            } else {
+                document.getElementById('callModalPhone').innerText = phone;
+                document.getElementById('proceedCallBtn').href = `tel:${phone}`;
+                document.getElementById('desktopCallModal').classList.remove('hidden');
+            }
+        }
+
+        function copyToClipboard() {
+            const phone = document.getElementById('callModalPhone').innerText;
+            navigator.clipboard.writeText(phone);
+            alert("Phone number copied to clipboard!");
+        }
+
+        function openWhatsAppModal(leadName, phone, owner) {
+            activeLeadContext = { leadName, phone, owner };
+            document.getElementById('waPhone').value = phone;
+            document.getElementById('waTemplateSelect').value = 'assign';
+            applyWATemplate();
+            document.getElementById('whatsappModal').classList.remove('hidden');
+        }
+
+        function applyWATemplate() {
+            const templateType = document.getElementById('waTemplateSelect').value;
+            const context = activeLeadContext || { leadName: 'Lead', owner: 'Team Member' };
+            let text = "";
+
+            if (templateType === 'assign') {
+                text = `Hi ${context.owner}, you have been assigned lead "${context.leadName}". Please check your LMS dashboard.`;
+            } else if (templateType === 'update') {
+                text = `Hi ${context.owner}, please provide a quick status update on lead "${context.leadName}".`;
+            } else if (templateType === 'lead_followup') {
+                text = `Hello ${context.leadName}, thanks for your interest! Let us know if you have any questions.`;
+            }
+
+            document.getElementById('waMessageBody').value = text;
+        }
+
+        function launchWhatsApp() {
+            const phone = document.getElementById('waPhone').value.replace(/[^0-9]/g, '');
+            const text = encodeURIComponent(document.getElementById('waMessageBody').value);
+            const waUrl = `https://wa.me/${phone}?text=${text}`;
+            window.open(waUrl, '_blank');
+            closeModal('whatsappModal');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        async function updateLeadStage(leadId, newStage) {
+            const response = await fetch(`/api/leads/${leadId}/stage`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stage: newStage })
+            });
+
+            if (response.ok) {
+                const lead = leadsData.find(l => l.id === leadId);
+                if (lead) lead.stage = newStage;
+                populateDynamicFilters();
+                renderStageButtons();
+                filterLeads();
+            }
+        }
+
+        function populateDynamicFilters() {
+            const stages = [...new Set(leadsData.map(l => l.stage).filter(Boolean))];
+            const owners = [...new Set(leadsData.map(l => l.owner).filter(Boolean))];
+            const campaigns = [...new Set(leadsData.map(l => l.campaign).filter(Boolean))];
+
+            document.getElementById('filter-stage').innerHTML = '<option value="all">All Stages</option>' + stages.map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('filter-owner').innerHTML = '<option value="all">All Owners</option>' + owners.map(o => `<option value="${o}">${o}</option>`).join('');
+            document.getElementById('filter-campaign').innerHTML = '<option value="all">All Campaigns</option>' + campaigns.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        // ADDED: Dynamically render stage quick-filter button tabs with real-time lead counts
+        function renderStageButtons() {
+            const stageContainer = document.getElementById('stageButtonsBar');
+            if (!stageContainer) return;
+
+            const selectedStage = document.getElementById('filter-stage').value;
+            const stagesToRender = ["all", ...availableStages];
+
+            stageContainer.innerHTML = stagesToRender.map(stage => {
+                const count = stage === 'all' 
+                    ? leadsData.length 
+                    : leadsData.filter(l => (l.stage || '').toLowerCase() === stage.toLowerCase()).length;
+
+                const isSelected = selectedStage.toLowerCase() === stage.toLowerCase();
+                const activeClass = isSelected 
+                    ? "bg-blue-600 text-white font-bold shadow-xs" 
+                    : "bg-white text-slate-600 hover:bg-slate-100 font-medium border border-slate-200";
+
+                const displayName = stage === 'all' ? 'All' : stage;
+
+                return `
+                    <button onclick="selectStageFilter('${stage}')" class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 transition whitespace-nowrap ${activeClass}">
+                        <span>${displayName}</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'} font-bold">${count}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // ADDED: Set stage dropdown value and trigger filtering from button click
+        function selectStageFilter(stage) {
+            document.getElementById('filter-stage').value = stage;
+            filterLeads();
+        }
+
+        function filterLeads() {
+            const searchTerm = document.getElementById('global-search').value.toLowerCase();
+            const selectedStage = document.getElementById('filter-stage').value;
+            const selectedOwner = document.getElementById('filter-owner').value;
+            const selectedCampaign = document.getElementById('filter-campaign').value;
+
+            const filtered = leadsData.filter(lead => {
+                const matchesSearch = (lead.name && lead.name.toLowerCase().includes(searchTerm)) ||
+                                      (lead.email && lead.email.toLowerCase().includes(searchTerm)) ||
+                                      (lead.phone && lead.phone.includes(searchTerm));
+
+                const matchesStage = (selectedStage === 'all') || (lead.stage && lead.stage.toLowerCase() === selectedStage.toLowerCase());
+                const matchesOwner = (selectedOwner === 'all') || (lead.owner === selectedOwner);
+                const matchesCampaign = (selectedCampaign === 'all') || (lead.campaign === selectedCampaign);
+
+                return matchesSearch && matchesStage && matchesOwner && matchesCampaign;
+            });
+
+            renderStageButtons();
+            renderTable(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('global-search').value = '';
+            document.getElementById('filter-stage').value = 'all';
+            document.getElementById('filter-owner').value = 'all';
+            document.getElementById('filter-campaign').value = 'all';
+            renderStageButtons();
+            renderTable(leadsData);
+        }
+
+        async function uploadExcelFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/upload-excel', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                await fetchUploadedFiles();
+                if (data.file_id) {
+                    document.getElementById('savedFilesSelect').value = data.file_id;
+                    await loadSelectedFile(data.file_id);
+                } else {
+                    await fetchLeads();
+                }
+                alert(data.message);
+            } else {
+                alert(data.detail || "Upload failed.");
+            }
+        }
+
+        function updateCounts(displayed) {
+            document.getElementById('showing-count').textContent = displayed;
+            document.getElementById('total-count').textContent = leadsData.length;
+        }
+    </script>
+</body>
+</html>
