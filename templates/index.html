@@ -158,46 +158,56 @@
                         M
                     </div>
 
-                    <button onclick="handleLogout()" class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg border border-slate-200 transition">
+                    <!-- USER ACTIONS -->
+                    <button onclick="handleLogout()" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg border border-slate-200 transition">
                         <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                         <span class="hidden md:inline">Logout</span>
                     </button>
+
                 </div>
             </header>
 
             <!-- FILTER CONTROL PANEL -->
             <div class="bg-white border-b border-slate-200/80 px-4 sm:px-7 py-3.5 shadow-2xs z-10">
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 items-end">
-                    <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
-                        <label>Lead Stage</label>
-                        <select id="filter-stage" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
-                            <option value="all">All Stages</option>
-                        </select>
+                <div class="flex flex-wrap lg:flex-nowrap items-end justify-between gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 items-end flex-1">
+                        <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
+                            <label>Lead Stage</label>
+                            <select id="filter-stage" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
+                                <option value="all">All Stages</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
+                            <label>Lead Owner / Teams</label>
+                            <select id="filter-owner" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
+                                <option value="all">All Owners</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
+                            <label>Campaign Source</label>
+                            <select id="filter-campaign" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
+                                <option value="all">All Campaigns</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
-                        <label>Lead Owner / Teams</label>
-                        <select id="filter-owner" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
-                            <option value="all">All Owners</option>
-                        </select>
-                    </div>
-
-                    <div class="flex flex-col text-[11px] text-slate-500 font-semibold gap-1">
-                        <label>Campaign Source</label>
-                        <select id="filter-campaign" onchange="filterLeads()" class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 bg-slate-50/50 focus:outline-none focus:border-blue-500 w-full">
-                            <option value="all">All Campaigns</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-center justify-between col-span-2 sm:col-span-1 gap-2 pt-2">
+                    <div class="flex items-center gap-3 self-end pb-0.5">
                         <button id="reset-filters" onclick="resetFilters()" class="text-xs text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-1 transition">
                             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+                        </button>
+
+                        <!-- MASS EMAIL BUTTON INTEGRATED IN THE FILTER ROW WITH STYLED ACCENT UI -->
+                        <button id="massEmailBtn" onclick="openMassEmailModal()" title="Send Mass Email to Leads" class="hidden flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-500/20 active:scale-95 transition">
+                            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                            <span>Mass Emailing</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- ADDED: STAGE QUICK FILTER BUTTONS BAR -->
+            <!-- STAGE QUICK FILTER BUTTONS BAR -->
             <div class="bg-slate-50/70 border-b border-slate-200 px-4 sm:px-7 py-2.5 flex items-center gap-2 overflow-x-auto custom-scrollbar text-xs">
                 <span class="text-slate-400 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">Filter Stage:</span>
                 <div id="stageButtonsBar" class="flex items-center gap-1.5">
@@ -234,6 +244,46 @@
                     Showing <span id="showing-count" class="font-bold text-slate-900">0</span> of <span id="total-count" class="font-bold text-slate-900">0</span> leads
                 </div>
             </footer>
+        </div>
+    </div>
+
+    <!-- MASS EMAIL MODAL -->
+    <div id="massEmailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-100">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div class="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+                    <i data-lucide="send" class="w-4 h-4"></i> Mass Email Communication
+                </div>
+                <button onclick="closeModal('massEmailModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Recipient Email Addresses (Extracted from File)</label>
+                    <textarea id="massEmailRecipients" readonly rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-mono text-slate-700 custom-scrollbar"></textarea>
+                    <p id="massEmailCount" class="text-[10px] text-slate-400 mt-1 font-semibold">Total Mail IDs: 0</p>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Select Email Template</label>
+                    <select id="massEmailTemplateSelect" onchange="applyMassEmailTemplate()" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium">
+                        <option value="assign">Assign Lead Details to Employees</option>
+                        <option value="update">Request Work Update</option>
+                        <option value="followup">Lead Follow-Up Greetings</option>
+                        <option value="custom">Custom Message</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Subject</label>
+                    <input type="text" id="massEmailSubject" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Message Body</label>
+                    <textarea id="massEmailBody" rows="5" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"></textarea>
+                </div>
+                <button onclick="launchMassGmail()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20">
+                    <i data-lucide="mail" class="w-4 h-4"></i> Send Mass Email via Sender Account
+                </button>
+            </div>
         </div>
     </div>
 
@@ -288,7 +338,7 @@
 
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">Phone Number</label>
+                    <label class="block font-semibold text-slate-600 mb-1">Recipient Phone Number</label>
                     <input type="text" id="waPhone" readonly class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-mono text-slate-700">
                 </div>
                 <div>
@@ -335,6 +385,9 @@
 
     <!-- JAVASCRIPT & LOGIC -->
     <script>
+        const SENDER_EMAIL = "monishvishwanath05@gmail.com";
+        const SENDER_PHONE = "7892332616";
+
         let currentUser = null;
         let leadsData = [];
         let activeLeadContext = null;
@@ -415,6 +468,17 @@
             document.getElementById('loginModal').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             
+            // Toggle Mass Email button visibility based on role (Manager/Admin only)
+            const massEmailBtn = document.getElementById('massEmailBtn');
+            const userRole = (user.role || '').toLowerCase();
+            if (massEmailBtn) {
+                if (userRole === 'manager' || userRole === 'admin') {
+                    massEmailBtn.classList.remove('hidden');
+                } else {
+                    massEmailBtn.classList.add('hidden');
+                }
+            }
+
             fetchUploadedFiles();
             fetchLeads();
         }
@@ -569,6 +633,77 @@
             updateCounts(leads.length);
         }
 
+        /* MASS EMAIL FUNCTIONALITY */
+        function openMassEmailModal() {
+            const userRole = (currentUser && currentUser.role) ? currentUser.role.toLowerCase() : '';
+            if (userRole !== 'manager' && userRole !== 'admin') {
+                alert("Access Denied: Only Managers and Admins can access Mass Emailing.");
+                return;
+            }
+
+            const emails = leadsData
+                .map(l => l.email)
+                .filter(e => e && e !== 'N/A' && e.includes('@'));
+
+            const uniqueEmails = [...new Set(emails)];
+
+            document.getElementById('massEmailRecipients').value = uniqueEmails.join(', ');
+            document.getElementById('massEmailCount').innerText = `Total Mail IDs: ${uniqueEmails.length}`;
+            document.getElementById('massEmailTemplateSelect').value = 'assign';
+            applyMassEmailTemplate();
+            document.getElementById('massEmailModal').classList.remove('hidden');
+        }
+
+        function applyMassEmailTemplate() {
+            const templateType = document.getElementById('massEmailTemplateSelect').value;
+            let subject = "";
+            let body = "";
+            const unsubscribeFooter = "\n\n---\nIf you no longer wish to receive these updates, please reply with 'UNSUBSCRIBE'.";
+
+            if (templateType === 'assign') {
+                subject = "[LMS Update] Lead Assignment Details & Notice";
+                body = "Hello Team,\n\nPlease check your respective assigned lead details in the LMS portal and follow up accordingly.\n\nBest regards," + unsubscribeFooter;
+            } else if (templateType === 'update') {
+                subject = "[Action Required] Work Update Request";
+                body = "Hi All,\n\nKindly send a quick status update regarding your active leads by the end of the day.\n\nThank you," + unsubscribeFooter;
+            } else if (templateType === 'followup') {
+                subject = "Greetings from LMS Team - Following Up";
+                body = "Hello,\n\nThank you for reaching out to us. We are following up to assist you further with your inquiry.\n\nWarm regards," + unsubscribeFooter;
+            } else {
+                subject = "Important Update";
+                body = unsubscribeFooter;
+            }
+
+            document.getElementById('massEmailSubject').value = subject;
+            document.getElementById('massEmailBody').value = body;
+        }
+
+        function launchMassGmail() {
+            const rawRecipients = document.getElementById('massEmailRecipients').value.trim();
+            if (!rawRecipients) {
+                alert("No valid email addresses extracted to send.");
+                return;
+            }
+
+            const recipientArray = rawRecipients.split(',').map(e => e.trim()).filter(e => e);
+            if (recipientArray.length > 50) {
+                alert("To avoid triggering spam filters and exceeding URL length limits, batch your bulk emails into groups of 50 or fewer recipients.");
+            }
+
+            // Using BCC to prevent revealing recipient email lists and lowering spam risk
+            const bcc = encodeURIComponent(rawRecipients);
+            const subject = encodeURIComponent(document.getElementById('massEmailSubject').value);
+            const body = encodeURIComponent(document.getElementById('massEmailBody').value);
+
+            let gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&bcc=${bcc}&su=${subject}&body=${body}`;
+            if (SENDER_EMAIL) {
+                gmailUrl += `&authuser=${encodeURIComponent(SENDER_EMAIL)}`;
+            }
+
+            window.open(gmailUrl, '_blank');
+            closeModal('massEmailModal');
+        }
+
         function openEmailModal(email, leadName, owner) {
             activeLeadContext = { email, leadName, owner };
             document.getElementById('emailRecipient').value = email;
@@ -607,7 +742,11 @@
             const subject = encodeURIComponent(document.getElementById('emailSubject').value);
             const body = encodeURIComponent(document.getElementById('emailBody').value);
 
-            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+            let gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+            if (SENDER_EMAIL) {
+                gmailUrl += `&authuser=${encodeURIComponent(SENDER_EMAIL)}`;
+            }
+
             window.open(gmailUrl, '_blank');
             closeModal('emailModal');
         }
@@ -655,9 +794,15 @@
         }
 
         function launchWhatsApp() {
-            const phone = document.getElementById('waPhone').value.replace(/[^0-9]/g, '');
+            const recipientPhone = document.getElementById('waPhone').value.replace(/[^0-9]/g, '');
             const text = encodeURIComponent(document.getElementById('waMessageBody').value);
-            const waUrl = `https://wa.me/${phone}?text=${text}`;
+            
+            let waUrl = `https://wa.me/${recipientPhone}?text=${text}`;
+            if (SENDER_PHONE) {
+                const cleanSenderPhone = SENDER_PHONE.replace(/[^0-9]/g, '');
+                waUrl += `&phone_from=${cleanSenderPhone}`;
+            }
+
             window.open(waUrl, '_blank');
             closeModal('whatsappModal');
         }
@@ -692,7 +837,6 @@
             document.getElementById('filter-campaign').innerHTML = '<option value="all">All Campaigns</option>' + campaigns.map(c => `<option value="${c}">${c}</option>`).join('');
         }
 
-        // ADDED: Dynamically render stage quick-filter button tabs with real-time lead counts
         function renderStageButtons() {
             const stageContainer = document.getElementById('stageButtonsBar');
             if (!stageContainer) return;
@@ -721,7 +865,6 @@
             }).join('');
         }
 
-        // ADDED: Set stage dropdown value and trigger filtering from button click
         function selectStageFilter(stage) {
             document.getElementById('filter-stage').value = stage;
             filterLeads();
