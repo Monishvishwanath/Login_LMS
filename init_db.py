@@ -3,7 +3,6 @@ import sqlite3
 conn = sqlite3.connect("lms_database.db")
 cursor = conn.cursor()
 
-# 1. Users Table
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,11 +13,9 @@ CREATE TABLE IF NOT EXISTS users (
 )
 ''')
 
-# 2. Seed Default Accounts (If Not Existing)
 cursor.execute("INSERT OR IGNORE INTO users (username, password, name, role) VALUES ('admin', 'admin123', 'Manager Admin', 'manager')")
 cursor.execute("INSERT OR IGNORE INTO users (username, password, name, role) VALUES ('john', 'john123', 'John Doe', 'employee')")
 
-# 3. Leads Table
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS leads (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

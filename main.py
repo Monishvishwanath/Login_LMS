@@ -14,14 +14,12 @@ import os
 from pathlib import Path
 
 
-# DATABASE CONFIGURATION
 DATABASE_URL = "sqlite:///./lms_database.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-# DATABASE MODELS
 
 class UploadedFileDB(Base):
     __tablename__ = "uploaded_files"
@@ -29,7 +27,7 @@ class UploadedFileDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, nullable=False)
     file_hash = Column(String, unique=True, index=True, nullable=False)
-    file_data = Column(LargeBinary, nullable=True)  # Stores original Excel binary
+    file_data = Column(LargeBinary, nullable=True) 
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
     leads = relationship("LeadDB", back_populates="file", cascade="all, delete-orphan")
@@ -64,7 +62,6 @@ class UserDB(Base):
 Base.metadata.create_all(bind=engine)
 
 
-# FASTAPI APP SETUP
 app = FastAPI()
 
 app.add_middleware(
@@ -104,7 +101,6 @@ def seed_default_users():
         db.close()
 
 
-# PYDANTIC SCHEMAS
 
 class StageUpdateSchema(BaseModel):
     stage: str
@@ -120,7 +116,6 @@ class SignUpSchema(BaseModel):
     role: Optional[str] = "employee"
 
 
-# ROUTES
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -304,7 +299,6 @@ def update_lead_stage(lead_id: int, payload: StageUpdateSchema, db: Session = De
     return {"message": "Stage updated successfully", "lead_id": lead_id, "new_stage": lead.stage}
 
 
-# ADDED ENDPOINT: Aggregated lead & file statistics
 @app.get("/api/leads/summary")
 def get_leads_summary(db: Session = Depends(get_db)):
     total_leads = db.query(func.count(LeadDB.id)).scalar() or 0
